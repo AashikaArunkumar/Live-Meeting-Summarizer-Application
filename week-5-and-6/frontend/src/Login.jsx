@@ -12,7 +12,7 @@ export default function Login({ setAuth }) {
     e.preventDefault();
     const endpoint = isRegister ? '/api/register' : '/api/login';
     try {
-      const res = await fetch(`http://localhost:8000${endpoint}`, {
+      const res = await fetch(`https://aashikaarun123-live-meeting-summarizer.hf.space${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })

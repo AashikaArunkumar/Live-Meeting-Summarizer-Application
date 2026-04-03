@@ -5,11 +5,12 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies including FFmpeg!
+# Install system dependencies including FFmpeg and PortAudio
 # We do this as root before switching users
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     build-essential \
+    libportaudio2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up a new user named "user" with user ID 1000 for Hugging Face Spaces

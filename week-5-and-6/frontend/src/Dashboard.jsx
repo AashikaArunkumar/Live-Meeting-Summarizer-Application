@@ -47,7 +47,7 @@ export default function Dashboard({ logout }) {
 
   const fetchSessions = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/sessions?user_id=${userId}`);
+      const res = await fetch(`https://aashikaarun123-live-meeting-summarizer.hf.space/api/sessions?user_id=${userId}`);
       const data = await res.json();
       setPastSessions(data);
     } catch (e) { console.error("Could not fetch sessions", e); }
@@ -114,7 +114,7 @@ export default function Dashboard({ logout }) {
     formData.append('file', file);
     
     try {
-      await fetch('http://localhost:8000/api/upload', {
+      await fetch('https://aashikaarun123-live-meeting-summarizer.hf.space/api/upload', {
         method: 'POST',
         body: formData
       });
@@ -144,7 +144,7 @@ export default function Dashboard({ logout }) {
         formData.append('file', file);
         
         try {
-          await fetch('http://localhost:8000/api/upload', {
+          await fetch('https://aashikaarun123-live-meeting-summarizer.hf.space/api/upload', {
             method: 'POST',
             body: formData
           });
@@ -172,7 +172,7 @@ export default function Dashboard({ logout }) {
   const saveSessionToDb = async () => {
     if (!sessionName.trim()) return alert("Provide a name!");
     try {
-      await fetch('http://localhost:8000/api/sessions', {
+      await fetch('https://aashikaarun123-live-meeting-summarizer.hf.space/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -209,7 +209,7 @@ export default function Dashboard({ logout }) {
   const confirmDeleteSession = async () => {
     if (!sessionToDelete) return;
     try {
-      await fetch(`http://localhost:8000/api/sessions/${sessionToDelete}`, {
+      await fetch(`https://aashikaarun123-live-meeting-summarizer.hf.space/api/sessions/${sessionToDelete}`, {
         method: 'DELETE'
       });
       if (activeSessionId === sessionToDelete) resetUI();
@@ -244,7 +244,7 @@ export default function Dashboard({ logout }) {
   useEffect(() => {
     let eventSource;
     const connectSSE = () => {
-      eventSource = new EventSource('http://localhost:8000/api/stream');
+      eventSource = new EventSource('https://aashikaarun123-live-meeting-summarizer.hf.space/api/stream');
       
       eventSource.onmessage = (event) => {
         try {
