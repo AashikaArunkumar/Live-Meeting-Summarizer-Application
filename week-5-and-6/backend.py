@@ -2,7 +2,12 @@ import os
 import queue
 import threading
 import numpy as np
-import sounddevice as sd
+try:
+    import sounddevice as sd
+except OSError:
+    sd = None
+    print("Warning: sounddevice or PortAudio not found. Server-side recording will be disabled.")
+
 import soundfile as sf
 import whisper
 import torch
@@ -20,7 +25,7 @@ class STTDiarizationSummarizer:
         self.transcript_queue = queue.Queue()
         
         self.is_recording = False
-        self.audio_data = [] # stores all raw audio
+        self.audio_data = [] # Buffer for raw audio streams
         
         print("Loading Whisper model (tiny.en)...")
         self.whisper_model = whisper.load_model("tiny.en") 
@@ -37,6 +42,11 @@ class STTDiarizationSummarizer:
         self.stream = None
 
     def start_recording(self):
+        if sd is None:
+            print("Error: Server-side recording is not supported on this device.")
+            self.transcript_queue.put("Error: Server-side recording is not supported in this environment (e.g. Render). Please try uploading an audio file instead.")
+            return
+
         self.is_recording = True
         self.audio_data = []
         self.audio_queue = queue.Queue()
@@ -216,7 +226,7 @@ class STTDiarizationSummarizer:
                         "text": ' '.join(current_wds)
                     })
 
-            # Calculate analytics
+            # Calculate speaker participation metrics
             speaker_stats = {}
             total_words = 0
             for turn in transcript_turns:
@@ -259,7 +269,7 @@ Transcript:
                         temperature=0.1
                     )
                     content = response.choices[0].message.content.strip()
-                    # Clean up backticks if model hallucinates them
+                    # Sanitize model output to ensure valid JSON format
                     if content.startswith("```"):
                         content = content.replace("```json", "").replace("```", "").strip()
                     summary_json_parsed = json.loads(content)

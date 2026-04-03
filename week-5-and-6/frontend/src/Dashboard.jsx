@@ -20,7 +20,7 @@ export default function Dashboard({ logout }) {
   const audioChunksRef = useRef([]);
   const recognitionRef = useRef(null);
   
-  // Storage for new session
+  // Session Metadata
   const [durationMinutes, setDurationMinutes] = useState(0);
   const [showSaveBar, setShowSaveBar] = useState(false);
   const [sessionName, setSessionName] = useState('');
@@ -266,7 +266,7 @@ export default function Dashboard({ logout }) {
 
       eventSource.onerror = () => {
         eventSource.close();
-        setTimeout(connectSSE, 3000); // Reconnect after 3 seconds
+        setTimeout(connectSSE, 3000); // Implement SSE reconnection mechanism
       };
     };
 
@@ -285,7 +285,7 @@ export default function Dashboard({ logout }) {
 
   return (
     <div className="dashboard-layout">
-      {/* SIDEBAR */}
+      {/* Application Navigation Console */}
       <aside className="sidebar">
         <div className="app-logo sidebar-logo">
            <div className="logo-icon"><Mic size={20} color="#fff"/></div>
@@ -342,10 +342,10 @@ export default function Dashboard({ logout }) {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
+      {/* Primary Presentation View */}
       <main className="main-content">
         
-        {/* STEPPER HEADER */}
+        {/* Process Lifecycle Indicator */}
         <header className="stepper-header">
            <div className="stepper">
               {STEPS.map((step, idx) => {
@@ -365,7 +365,7 @@ export default function Dashboard({ logout }) {
            </div>
         </header>
 
-        {/* SAVE BAR */}
+        {/* Session Metadata Input Interface */}
         {showSaveBar && (
           <div className="save-bar">
              <p>Session processing complete. Save to history?</p>
@@ -377,10 +377,10 @@ export default function Dashboard({ logout }) {
           </div>
         )}
 
-        {/* 3 PANELS */}
+        {/* Multi-Dimensional Analytics Grid */}
         <div className="panels-grid">
            
-           {/* Column 1: Live Transcript */}
+           {/* Transcription Stream Component */}
            <div className="card transcript-card">
               <div className="card-header">
                  <h3>Live Transcript</h3>
@@ -406,7 +406,7 @@ export default function Dashboard({ logout }) {
               </div>
            </div>
 
-           {/* Column 2: Speaker Analytics */}
+           {/* Diarization Distribution Component */}
            <div className="card analytics-card">
               <div className="card-header">
                  <h3>Speaker Analytics</h3>
@@ -415,7 +415,7 @@ export default function Dashboard({ logout }) {
               <div className="card-body">
                  {analytics.length > 0 ? (
                    <>
-                     {/* CSS Donut Chart */}
+                     {/* Activity Distribution Chart */}
                      <div className="chart-container">
                         <div className="css-donut" style={{background: buildConicGradient(analytics)}}>
                           <div className="donut-hole"></div>
@@ -448,7 +448,7 @@ export default function Dashboard({ logout }) {
               </div>
            </div>
 
-           {/* Column 3: Summary & Actions */}
+           {/* AI Telemetry and Artifact Extraction */}
            <div className="card summary-card">
               <div className="card-header">
                  <h3>Summary & Actions</h3>
@@ -483,7 +483,7 @@ export default function Dashboard({ logout }) {
         </div>
       </main>
 
-      {/* DELETE CONFIRMATION MODAL */}
+      {/* Critical Action Confirmation Dialog */}
       {sessionToDelete && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -500,7 +500,7 @@ export default function Dashboard({ logout }) {
   );
 }
 
-// Helpers for the exact screenshot logic
+// UI Rendering Utilities
 function getAvatarColor(speakerName) {
    let hash = 0;
    for (let i = 0; i < speakerName.length; i++) {

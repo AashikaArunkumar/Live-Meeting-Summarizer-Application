@@ -28,13 +28,11 @@ app.add_middleware(
 pipeline = STTDiarizationSummarizer()
 sse_queue = queue.Queue()
 
-# --- MongoDB Setup ---
+# Database Configuration
 try:
-    # To use MongoDB Atlas, set the 'MONGO_URI' environment variable or replace the string below:
-    # Example Atlas URI: "mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority"
-    mongo_uri = os.getenv("MONGO_URI")
+    mongo_uri = os.environ.get("MONGO_URI", "mongodb_uri")
     
-    # tlsAllowInvalidCertificates=True helps prevent SSL errors on some Windows machines when connecting to Atlas
+    # Establish connection with robust SSL handling for generalized OS compatibility
     client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000, tlsAllowInvalidCertificates=True)
     db = client["meeting_summarizer"]
     client.server_info()
@@ -42,7 +40,7 @@ try:
 except Exception as e:
     print(f"Warning: MongoDB connection failed - {e}")
 
-# --- Pydantic Models ---
+# Data Models
 class UserAuth(BaseModel):
     username: str
     password: str
@@ -58,7 +56,7 @@ class SaveSessionRequest(BaseModel):
     analytics: List[Dict[str, Any]]
     summary: Dict[str, Any]
 
-# --- Auth Endpoints ---
+# Authentication Routes
 @app.post("/api/register")
 def register(user: UserAuth):
     users_col = db["users"]
@@ -80,7 +78,7 @@ def login(user: UserAuth):
         return {"error": "Invalid credentials"}
     return {"status": "success", "user_id": str(db_user["_id"])}
 
-# --- Session Management Endpoints ---
+# Session Management Routes
 @app.post("/api/sessions")
 def save_session(session: SaveSessionRequest):
     sessions_col = db["sessions"]
@@ -122,7 +120,7 @@ def delete_session(session_id: str):
         return {"status": "success", "message": "Session deleted"}
     return {"error": "Not found"}
 
-# --- Recording Endpoints ---
+# Media Processing Routes
 @app.post("/api/start")
 def start_recording(req: StartRequest):
     if pipeline.is_recording:
