@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mic, Square, RotateCcw, CheckCircle2, Circle, Lightbulb, CheckSquare, Trash2 } from 'lucide-react';
+import { Mic, Square, RotateCcw, CheckCircle2, Circle, Lightbulb, CheckSquare, Trash2, Download, FileText } from 'lucide-react';
+import jsPDF from 'jspdf';
 import './Dashboard.css';
 
 const STEPS = ["Recording", "Transcribing", "Diarizing", "Summarizing", "Done"];
@@ -51,6 +52,52 @@ export default function Dashboard({ logout }) {
       const data = await res.json();
       setPastSessions(data);
     } catch (e) { console.error("Could not fetch sessions", e); }
+  };
+
+  const exportMD = () => {
+    if (!summaryData) return;
+    let md = `# Meeting Summary\n\n## Summary\n${summaryData.summary}\n\n`;
+    md += `## Action Items\n${(summaryData.action_items || []).map(i => `- ${i}`).join('\n')}\n\n`;
+    md += `## Key Decisions\n${(summaryData.decisions || []).map(i => `- ${i}`).join('\n')}\n\n`;
+    md += `## Transcript\n${transcriptTurns.map(t => `**${t.speaker}** [${t.time}]: ${t.text}`).join('\n\n')}`;
+    
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `meeting_summary_${activeSessionId || 'export'}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPDF = () => {
+    if (!summaryData) return;
+    const doc = new jsPDF();
+    let y = 20;
+    
+    const printText = (text, isHeader = false) => {
+      doc.setFontSize(isHeader ? 16 : 12);
+      doc.setFont('helvetica', isHeader ? 'bold' : 'normal');
+      const lines = doc.splitTextToSize(text || '', 170);
+      lines.forEach(line => {
+        if (y > 280) { doc.addPage(); y = 20; }
+        doc.text(line, 20, y);
+        y += isHeader ? 10 : 7;
+      });
+      y += isHeader ? 2 : 5;
+    };
+
+    printText("Meeting Summary", true);
+    printText("Summary", true);
+    printText(summaryData.summary);
+    
+    printText("Action Items", true);
+    (summaryData.action_items || []).forEach(item => printText(`- ${item}`));
+    
+    printText("Key Decisions", true);
+    (summaryData.decisions || []).forEach(item => printText(`- ${item}`));
+
+    doc.save(`meeting_summary_${activeSessionId || 'export'}.pdf`);
   };
 
   const startRecording = async () => {
@@ -450,9 +497,21 @@ export default function Dashboard({ logout }) {
 
            {/* AI Telemetry and Artifact Extraction */}
            <div className="card summary-card">
-              <div className="card-header">
-                 <h3>Summary & Actions</h3>
-                 <span>AI-generated insights</span>
+              <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                 <div>
+                   <h3>Summary & Actions</h3>
+                   <span>AI-generated insights</span>
+                 </div>
+                 {summaryData && (
+                   <div style={{ display: 'flex', gap: '8px' }}>
+                     <button onClick={exportMD} title="Download Markdown" style={{ display:'flex', alignItems:'center', gap:'4px', padding:'4px 8px', background:'transparent', border:'1px solid #cbd5e1', borderRadius:'4px', cursor:'pointer' }}>
+                       <FileText size={14} /> MD
+                     </button>
+                     <button onClick={exportPDF} title="Download PDF" style={{ display:'flex', alignItems:'center', gap:'4px', padding:'4px 8px', background:'transparent', border:'1px solid #cbd5e1', borderRadius:'4px', cursor:'pointer' }}>
+                       <Download size={14} /> PDF
+                     </button>
+                   </div>
+                 )}
               </div>
               <div className="card-body">
                  {summaryData ? (
