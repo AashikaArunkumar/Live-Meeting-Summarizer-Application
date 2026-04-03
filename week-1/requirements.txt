@@ -1,5 +1,0 @@
-vosk
-openai-whisper
-jiwer
-sounddevice
-torch
